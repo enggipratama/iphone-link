@@ -6118,7 +6118,7 @@ def main() -> None:
         frameless=True,
         easy_drag=False,
         min_size=(336, 420),
-        background_color="#00000000",
+        background_color="#000000",
     )
     api.set_window(window)
 
