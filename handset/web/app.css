@@ -2951,3 +2951,342 @@ body {
     width: min(var(--display-width, 840px), calc((100vh - 68px) * var(--device-aspect, 2.176166)), calc(100vw - 40px)) !important;
   }
 }
+
+/* ======================================================================
+   Floating Settings overlay — keep the iPhone screen as the focal point.
+   ====================================================================== */
+.app.mac-mode .app-bar #btn-settings-toolbar {
+  display: none !important;
+}
+
+.app.mac-mode.is-fullsize .preview-heading {
+  position: absolute !important;
+  top: clamp(78px, 14vh, 148px) !important;
+  left: clamp(24px, 3.3vw, 52px) !important;
+  z-index: 5 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 4px !important;
+  color: #f4f7fc !important;
+  pointer-events: none !important;
+}
+
+.app.mac-mode .preview-kicker {
+  color: #c8d2e2 !important;
+  font-size: 11px !important;
+  font-weight: 650 !important;
+  letter-spacing: 1.1px !important;
+  line-height: 1.3 !important;
+}
+
+.app.mac-mode .preview-title {
+  color: #f4f7fc !important;
+  font-size: 22px !important;
+  font-weight: 650 !important;
+  letter-spacing: -0.3px !important;
+  line-height: 1.3 !important;
+}
+
+.app.mac-mode .screen-settings-button {
+  position: absolute !important;
+  top: 22% !important;
+  left: calc(var(--display-width, 346px) - 6px) !important;
+  z-index: 35 !important;
+  display: inline-flex !important;
+  width: 54px !important;
+  height: 54px !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
+  color: #edf5ff !important;
+  background: rgba(18, 25, 36, 0.94) !important;
+  border: 1px solid rgba(179, 207, 244, 0.82) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.38), 0 0 0 3px rgba(12, 17, 25, 0.65) !important;
+  backdrop-filter: blur(18px) saturate(150%) !important;
+  -webkit-backdrop-filter: blur(18px) saturate(150%) !important;
+  cursor: pointer !important;
+  transition: background 0.16s ease, border-color 0.16s ease, transform 0.16s ease, box-shadow 0.16s ease !important;
+}
+
+.app.mac-mode .screen-settings-button:hover,
+.app.mac-mode .screen-settings-button:focus-visible {
+  background: rgba(39, 55, 78, 0.98) !important;
+  border-color: rgba(213, 230, 255, 0.98) !important;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.42), 0 0 0 4px rgba(108, 157, 233, 0.25) !important;
+  transform: translateY(-1px) !important;
+  outline: none !important;
+}
+
+.app.mac-mode .screen-settings-button:active,
+.app.mac-mode .screen-settings-button.active {
+  color: #f1f6ff !important;
+  background: rgba(29, 42, 61, 0.98) !important;
+  border-color: #9fc2ff !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.38), 0 0 0 3px rgba(84, 137, 224, 0.28) !important;
+}
+
+.app.mac-mode .side-drawer {
+  position: absolute !important;
+  top: 50% !important;
+  right: 20px !important;
+  left: calc(var(--display-width, 346px) + 40px) !important;
+  width: auto !important;
+  min-width: 0 !important;
+  max-width: 340px !important;
+  height: auto !important;
+  max-height: min(510px, calc(100vh - 140px)) !important;
+  flex: none !important;
+  overflow: hidden !important;
+  transform: translateY(-50%) !important;
+  z-index: 32 !important;
+  background: rgba(21, 25, 34, 0.96) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  border-radius: 19px !important;
+  box-shadow: 0 18px 52px rgba(0, 0, 0, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
+  backdrop-filter: blur(28px) saturate(150%) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(150%) !important;
+}
+
+.app.mac-mode .side-drawer[hidden] {
+  display: none !important;
+}
+
+.app.mac-mode .drawer-header {
+  height: 58px !important;
+  min-height: 58px !important;
+  padding: 10px 18px !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.10) !important;
+}
+
+.app.mac-mode .drawer-title {
+  color: #f4f7fc !important;
+  font-size: 17px !important;
+  font-weight: 650 !important;
+  letter-spacing: -0.2px !important;
+}
+
+.app.mac-mode .icon-btn-close {
+  width: 32px !important;
+  height: 32px !important;
+  color: #d4dceb !important;
+  background: rgba(255, 255, 255, 0.06) !important;
+  border: 1px solid rgba(255, 255, 255, 0.07) !important;
+  border-radius: 50% !important;
+  font-size: 16px !important;
+}
+
+.app.mac-mode .drawer-content {
+  min-height: 0 !important;
+  padding: 2px 16px 14px !important;
+  gap: 0 !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  overscroll-behavior: contain !important;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.22) transparent;
+}
+
+.app.mac-mode .drawer-content > .panel-theme,
+.app.mac-mode .drawer-content > .panel-display-fit {
+  margin: 0 !important;
+  padding: 13px 4px !important;
+  background: transparent !important;
+  border: 0 !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.09) !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+.app.mac-mode .drawer-content > .panel-display-fit {
+  padding-top: 14px !important;
+}
+
+.app.mac-mode .drawer-section-label {
+  margin-bottom: 8px !important;
+  color: #dce4ef !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+}
+
+.app.mac-mode .panel-display-fit .setting-label {
+  color: #e7edf6 !important;
+  font-size: 12px !important;
+  font-weight: 550 !important;
+}
+
+.app.mac-mode .panel-display-fit .setting-hint {
+  color: #9da9ba !important;
+  font-size: 10px !important;
+}
+
+.app.mac-mode .panel-display-fit .crop-grid {
+  margin-top: 14px !important;
+  padding: 0 !important;
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+.app.mac-mode .panel-display-fit .crop-grid .drawer-section-label {
+  margin-bottom: 4px !important;
+}
+
+.app.mac-mode .drawer-content::-webkit-scrollbar {
+  width: 5px;
+}
+
+.app.mac-mode .drawer-content::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 5px;
+}
+
+.app.mac-mode[data-theme="light"] .side-drawer {
+  background: rgba(245, 248, 253, 0.97) !important;
+  border-color: rgba(15, 23, 42, 0.13) !important;
+  box-shadow: 0 18px 52px rgba(15, 23, 42, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.9) !important;
+}
+
+.app.mac-mode[data-theme="light"] .drawer-header,
+.app.mac-mode[data-theme="light"] .drawer-content > .panel-theme,
+.app.mac-mode[data-theme="light"] .drawer-content > .panel-display-fit {
+  border-color: rgba(15, 23, 42, 0.10) !important;
+}
+
+.app.mac-mode[data-theme="light"] .drawer-title,
+.app.mac-mode[data-theme="light"] .drawer-section-label,
+.app.mac-mode[data-theme="light"] .panel-display-fit .setting-label {
+  color: #1e293b !important;
+}
+
+.app.mac-mode[data-theme="light"] .screen-settings-button {
+  color: #1e293b !important;
+  background: rgba(246, 249, 255, 0.96) !important;
+  border-color: rgba(71, 85, 105, 0.42) !important;
+}
+
+.app.mac-mode.is-fullsize .screen-settings-button {
+  left: calc(50% + 170px) !important;
+}
+
+.app.mac-mode.is-fullsize .side-drawer {
+  right: clamp(18px, calc(50vw - 580px), 210px) !important;
+  left: auto !important;
+  width: min(350px, calc(100vw - 36px)) !important;
+  max-width: 350px !important;
+}
+
+@media (max-width: 900px) {
+  .app.mac-mode.is-fullsize.drawer-open .display-col {
+    width: calc(100% - 360px) !important;
+    max-width: calc(100% - 360px) !important;
+    flex: 0 0 calc(100% - 360px) !important;
+  }
+
+  .app.mac-mode.is-fullsize .screen-settings-button {
+    left: calc(50% - 24px) !important;
+  }
+
+  .app.mac-mode.is-fullsize .side-drawer {
+    right: 10px !important;
+    width: min(340px, calc(100vw - 24px)) !important;
+    max-height: calc(100vh - 92px) !important;
+  }
+
+  .app.mac-mode .preview-heading {
+    display: none !important;
+  }
+}
+
+@media (max-width: 520px) {
+  .app.mac-mode .screen-settings-button {
+    left: calc(var(--display-width, 346px) - 28px) !important;
+    width: 48px !important;
+    height: 48px !important;
+  }
+
+  .app.mac-mode.is-fullsize .screen-settings-button {
+    left: calc(100% - 58px) !important;
+  }
+
+  .app.mac-mode .side-drawer,
+  .app.mac-mode.is-fullsize .side-drawer {
+    top: auto !important;
+    right: 12px !important;
+    bottom: 12px !important;
+    left: 12px !important;
+    width: auto !important;
+    max-width: none !important;
+    max-height: min(62vh, 540px) !important;
+    transform: none !important;
+  }
+}
+
+/* The legacy full-size drawer rules target #control-pane directly, so restate
+   the overlay geometry at matching specificity instead of inheriting the old
+   full-height side-panel dimensions. */
+.app.mac-mode.drawer-open #control-pane {
+  top: 50% !important;
+  right: 20px !important;
+  bottom: auto !important;
+  left: calc(var(--display-width, 346px) + 40px) !important;
+  width: auto !important;
+  min-width: 0 !important;
+  max-width: 340px !important;
+  height: auto !important;
+  max-height: min(510px, calc(100vh - 140px)) !important;
+  flex: none !important;
+  overflow: hidden !important;
+  transform: translateY(-50%) translateZ(0) !important;
+  z-index: 32 !important;
+}
+
+.app.mac-mode.is-fullsize.drawer-open #control-pane {
+  right: clamp(18px, calc(50vw - 580px), 210px) !important;
+  left: auto !important;
+  width: min(350px, calc(100vw - 36px)) !important;
+  max-width: 350px !important;
+}
+
+.app.mac-mode .segmented-fit {
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 4px !important;
+}
+
+.app.mac-mode .segmented-fit .seg {
+  min-width: 0 !important;
+  padding-right: 4px !important;
+  padding-left: 4px !important;
+  font-size: 10.5px !important;
+  white-space: nowrap !important;
+}
+
+@media (max-width: 900px) {
+  .app.mac-mode.is-fullsize.drawer-open #control-pane {
+    top: 50% !important;
+    right: 10px !important;
+    left: auto !important;
+    width: min(340px, calc(100vw - 24px)) !important;
+    max-width: 340px !important;
+    height: auto !important;
+    max-height: min(510px, calc(100vh - 92px)) !important;
+  }
+}
+
+@media (max-width: 520px) {
+  .app.mac-mode.drawer-open #control-pane,
+  .app.mac-mode.is-fullsize.drawer-open #control-pane {
+    top: auto !important;
+    right: 12px !important;
+    bottom: 12px !important;
+    left: 12px !important;
+    width: auto !important;
+    max-width: none !important;
+    height: auto !important;
+    max-height: min(62vh, 540px) !important;
+    transform: translateZ(0) !important;
+  }
+}

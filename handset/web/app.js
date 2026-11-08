@@ -173,6 +173,7 @@ function toggleSettings(open) {
   controlPane.classList.toggle("is-open", shouldOpen);
   controlPane.setAttribute("aria-hidden", String(!shouldOpen));
   btnSettings?.classList.toggle("active", shouldOpen);
+  btnSettings?.setAttribute("aria-expanded", String(shouldOpen));
   appRoot?.classList.toggle("drawer-open", shouldOpen);
 
   // Tahap 91: Dispatch resize to mirror iframe & window so layout updates smoothly
@@ -1505,6 +1506,8 @@ function applyFullsizeState(full, forceDrawerClose = true) {
     if (isFullSize && forceDrawerClose) {
       isDrawerOpen = false;
       appRoot.classList.remove("drawer-open");
+      btnSettings?.classList.remove("active");
+      btnSettings?.setAttribute("aria-expanded", "false");
       if (controlPane) {
         controlPane.classList.remove("is-open");
         controlPane.classList.remove("open");

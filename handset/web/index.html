@@ -6,7 +6,7 @@
   <meta name="description" content="Mirror and control your iPhone screen on Windows over USB or Wi-Fi.">
   <title>iPhone Link — iPhone Mirroring &amp; Control for Windows</title>
   <link rel="icon" type="image/svg+xml" href="/logo.svg">
-  <link rel="stylesheet" href="/app.css?v=20261108_screen_only_preview">
+  <link rel="stylesheet" href="/app.css?v=20261108_settings_overlay">
 </head>
 <body>
   <div class="app mac-mode" id="app-root">
@@ -79,7 +79,7 @@
             <line x1="17" y1="9" x2="23" y2="15"></line>
           </svg>
         </button>
-        <button type="button" class="icon-btn" id="btn-settings" title="Toggle Settings Side-Drawer" aria-label="Settings">
+        <button type="button" class="icon-btn" id="btn-settings-toolbar" title="Settings" aria-label="Settings">
           <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="3"></circle>
             <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
@@ -122,8 +122,12 @@
       </div>
     </header>
 
-    <!-- Main Container: Video Display (Kiri) + Side Drawer Settings (Kanan) -->
+    <!-- Main Container: iPhone preview with a floating Settings overlay -->
     <div class="main-body" id="main-body">
+      <div class="preview-heading" aria-hidden="true">
+        <span class="preview-kicker">LIVE IPHONE SCREEN</span>
+        <strong class="preview-title">Live preview</strong>
+      </div>
       <div class="display-col" id="display-col">
         <!-- Murni Display Edge-to-Edge -->
         <main class="workspace stage" id="workspace">
@@ -172,10 +176,17 @@
         </nav>
       </div>
 
-      <!-- Settings Side-Drawer (Sebelah Kanan, Tidak Menutupi Layar Video) -->
+      <button type="button" class="screen-settings-button" id="btn-settings" title="Open Settings" aria-label="Open Settings" aria-controls="control-pane" aria-expanded="false">
+        <svg viewBox="0 0 24 24" width="27" height="27" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+        </svg>
+      </button>
+
+      <!-- Settings overlay: compact at first glance; remaining controls stay scrollable. -->
       <aside class="side-drawer" id="control-pane" aria-label="Settings and controls" hidden>
         <div class="drawer-header">
-          <h2 class="drawer-title">Settings & Controls</h2>
+          <h2 class="drawer-title">Settings</h2>
           <button type="button" class="icon-btn-close" id="close-settings" title="Close settings" aria-label="Close">✕</button>
         </div>
 
@@ -183,13 +194,13 @@
           <section class="card panel-theme">
             <span class="drawer-section-label">Appearance</span>
             <div class="segmented segmented-theme" role="radiogroup" aria-label="Theme">
-              <button type="button" class="seg is-active" data-theme-choice="dark" role="radio" aria-checked="true">🌙 Dark</button>
-              <button type="button" class="seg" data-theme-choice="light" role="radio" aria-checked="false">☀️ Light</button>
+              <button type="button" class="seg is-active" data-theme-choice="dark" role="radio" aria-checked="true">Dark</button>
+              <button type="button" class="seg" data-theme-choice="light" role="radio" aria-checked="false">Light</button>
             </div>
           </section>
 
           <section class="card panel-display-fit">
-            <span class="drawer-section-label">Display Fit & Aspect</span>
+            <span class="drawer-section-label">Display Fit</span>
             <div class="segmented segmented-fit" role="radiogroup" aria-label="Display Fit">
               <button type="button" class="seg is-active active" data-fit-choice="autofit" role="radio" aria-checked="true">Auto-Fit</button>
               <button type="button" class="seg" data-fit-choice="fill" role="radio" aria-checked="false">Edge-to-Edge</button>
@@ -198,8 +209,8 @@
 
             <div class="setting-toggle-item" style="margin-top: 10px; margin-bottom: 8px;">
               <div class="setting-toggle-header">
-                <span class="setting-label">🎮 Auto-Rotate Game</span>
-                <span class="setting-hint">eFootball / Genshin</span>
+                <span class="setting-label">Auto-Rotate</span>
+                <span class="setting-hint">For games</span>
               </div>
               <div class="segmented segmented-toggle" role="radiogroup" aria-label="Auto-Rotate Game">
                 <button type="button" class="seg is-active" data-auto-rotate-choice="off" role="radio" aria-checked="true">OFF</button>
@@ -530,6 +541,6 @@
   </div>
 
   <script src="/keys.js?v=20261101_tahap67_true_dwm_autofit"></script>
-  <script src="/app.js?v=20261108_iphone_mirroring_frame"></script>
+  <script src="/app.js?v=20261108_settings_overlay"></script>
 </body>
 </html>
