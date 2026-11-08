@@ -1008,3 +1008,34 @@ document.querySelector("#sidebar-minimize")?.addEventListener("click", () => {
 document.querySelector("#sidebar-close")?.addEventListener("click", () => {
   window.pywebview?.api?.close?.();
 });
+
+
+// Reverse hover logic: hide toolbar when hovering screen
+(function() {
+  const appBar = document.querySelector(".app-bar");
+  const phoneScreen = document.querySelector("#phone-screen, #phone-shell, .screen-stage");
+  
+  if (!appBar || !phoneScreen) return;
+  
+  // Show toolbar by default
+  appBar.style.opacity = "1";
+  appBar.style.pointerEvents = "auto";
+  
+  // Hide when hovering phone screen
+  phoneScreen.addEventListener("mouseenter", () => {
+    appBar.style.opacity = "0";
+    appBar.style.pointerEvents = "none";
+  });
+  
+  // Show when leaving phone screen
+  phoneScreen.addEventListener("mouseleave", () => {
+    appBar.style.opacity = "1";
+    appBar.style.pointerEvents = "auto";
+  });
+  
+  // Keep visible when hovering toolbar
+  appBar.addEventListener("mouseenter", () => {
+    appBar.style.opacity = "1";
+    appBar.style.pointerEvents = "auto";
+  });
+})();
