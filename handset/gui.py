@@ -6117,6 +6117,7 @@ def main() -> None:
         height=844,
         frameless=True,
         easy_drag=False,
+        resizable=True,
         min_size=(336, 420),
         background_color="#000000",
     )
