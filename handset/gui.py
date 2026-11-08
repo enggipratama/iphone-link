@@ -1580,8 +1580,8 @@ def _run_ui_self_test() -> int:
         title="iPhone Link UI Self-Test",
         url=f"http://127.0.0.1:{free_port}/?t={int(time.time())}",
         js_api=api,
-        width=346,
-        height=832,
+        width=390,
+        height=844,
         frameless=True,
     )
     api.set_window(window)
