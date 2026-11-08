@@ -2750,14 +2750,14 @@ body {
   top: 0;
   left: 0;
   right: 0;
+  height: 50px;
   z-index: 9999;
   background: rgba(0, 0, 0, 0.85);
   backdrop-filter: blur(12px);
 }
 
-/* Only show toolbar when hovering the top 40px */
-.app.mac-mode .app-bar:hover,
-.app.mac-mode:hover .app-bar:hover {
+/* Show toolbar when hovering the window */
+.app.mac-mode:hover .app-bar {
   opacity: 1;
   pointer-events: auto;
 }
@@ -2891,4 +2891,26 @@ body {
 .app.mac-mode * {
   border: none !important;
   outline: none !important;
+}
+
+
+/* Aggressive corner fix - clip everything */
+.app.mac-mode {
+  border-radius: 50px !important;
+  overflow: hidden !important;
+  clip-path: inset(0 round 50px) !important;
+}
+
+.app.mac-mode #phone-shell,
+.app.mac-mode .screen-stage,
+.app.mac-mode #phone-screen,
+.app.mac-mode .screen-viewport,
+.app.mac-mode #screen-view,
+.app.mac-mode iframe,
+.app.mac-mode canvas,
+.app.mac-mode .main-body,
+.app.mac-mode .display-col,
+.app.mac-mode .workspace {
+  border-radius: 50px !important;
+  overflow: hidden !important;
 }
