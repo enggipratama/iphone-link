@@ -3063,3 +3063,43 @@ body.mac-mode {
   background: rgba(255, 255, 255, 0.2);
   margin: 4px 0;
 }
+
+
+/* ============================================
+   Reverse hover logic: hide toolbar when hovering screen
+   ============================================ */
+
+/* Show toolbar by default */
+.app.mac-mode .app-bar {
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  display: flex !important;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(12px);
+  transition: opacity 0.2s ease;
+}
+
+/* Hide toolbar when hovering the phone screen area */
+.app.mac-mode #phone-shell:hover ~ .app-bar,
+.app.mac-mode .screen-stage:hover ~ .app-bar,
+.app.mac-mode #phone-screen:hover ~ .app-bar,
+.app.mac-mode .main-body:hover .app-bar {
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* Keep toolbar visible when hovering the toolbar itself */
+.app.mac-mode .app-bar:hover {
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
+/* Hide sidebar by default, show when not hovering screen */
+.mac-sidebar {
+  display: none !important;
+}
