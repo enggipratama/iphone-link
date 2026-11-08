@@ -6113,14 +6113,24 @@ def main() -> None:
         title="iPhone Link",
         url=f"http://{host}:{port}/?t={int(time.time())}",
         js_api=api,
-        width=346,
-        height=832,
+        width=390,
+        height=844,
         frameless=True,
         easy_drag=False,
         min_size=(336, 420),
         background_color="#000000",
     )
     api.set_window(window)
+
+    # Apply DWM rounded corners (Windows 11)
+    if sys.platform == "win32":
+        try:
+            hwnd = ctypes.windll.user32.FindWindowW(None, "iPhone Link")
+            if hwnd:
+                preference = ctypes.c_int(2)  # DWMWCP_ROUND
+                ctypes.windll.dwmapi.DwmSetWindowAttribute(hwnd, 33, ctypes.byref(preference), ctypes.sizeof(preference))
+        except Exception:
+            pass
 
     storage_path = _resolve_webview_storage_path()
     try:
