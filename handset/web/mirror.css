@@ -138,3 +138,10 @@ body, html {
   border-radius: 50px !important;
   overflow: hidden !important;
 }
+
+
+/* Transparent background */
+body, html, #crop-wrapper {
+  background: transparent !important;
+  background-color: transparent !important;
+}
