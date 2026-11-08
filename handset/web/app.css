@@ -2735,3 +2735,62 @@ body {
     margin: auto !important;
   }
 }
+
+
+/* ============================================
+   Mac-like iPhone Mirroring Style
+   ============================================ */
+
+/* Hide toolbar by default, show on hover */
+.app.mac-mode .app-bar {
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(12px);
+}
+
+.app.mac-mode:hover .app-bar {
+  opacity: 1;
+}
+
+/* Ensure buttons are clickable */
+.app.mac-mode .app-actions {
+  -webkit-app-region: no-drag;
+}
+
+/* iPhone-like rounded corners */
+.app.mac-mode {
+  border-radius: 40px;
+  overflow: hidden;
+}
+
+.app.mac-mode #phone-shell,
+.app.mac-mode .screen-stage,
+.app.mac-mode #phone-screen,
+.app.mac-mode .screen-viewport {
+  border-radius: 40px;
+  overflow: hidden;
+}
+
+.app.mac-mode #screen-view,
+.app.mac-mode iframe {
+  border-radius: 40px;
+}
+
+/* Hide bottom nav in mac-mode */
+.app.mac-mode .quick-nav {
+  display: none;
+}
+
+/* Fill window */
+.app.mac-mode .main-body,
+.app.mac-mode .display-col,
+.app.mac-mode .workspace {
+  padding: 0;
+  margin: 0;
+}
