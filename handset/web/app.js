@@ -1838,6 +1838,10 @@ async function openDevice(udid, force = false) {
       pillDevice.hidden = false;
       pillDevice.textContent = device.info.DeviceName;
     }
+    // Resize window for device
+    if (device.info?.ProductType && window.pywebview?.api?.resize_for_device) {
+      window.pywebview.api.resize_for_device(device.info.ProductType);
+    }
   } catch (error) {
     detail.textContent = error.message;
   }
