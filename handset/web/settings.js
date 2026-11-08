@@ -971,3 +971,22 @@ if (document.readyState === "loading") {
 } else {
   setupEarlyControls();
 }
+
+
+// Keyboard shortcuts for mac-mode
+document.addEventListener("keydown", (e) => {
+  if (!e.altKey) return;
+  if (e.key === "s" || e.key === "S") {
+    e.preventDefault();
+    document.querySelector("#btn-settings")?.click();
+  } else if (e.key === "r" || e.key === "R") {
+    e.preventDefault();
+    fetch("/api/screen/restart", { method: "POST" }).catch(() => {});
+  } else if (e.key === "q" || e.key === "Q") {
+    e.preventDefault();
+    window.pywebview?.api?.close?.();
+  } else if (e.key === "m" || e.key === "M") {
+    e.preventDefault();
+    window.pywebview?.api?.minimize?.();
+  }
+});
