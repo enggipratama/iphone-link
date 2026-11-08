@@ -2960,3 +2960,48 @@ body.mac-mode {
 .app.mac-mode:hover::after {
   opacity: 1;
 }
+
+
+/* ============================================
+   iPhone-like Rounded Corners (CSS)
+   ============================================ */
+
+/* Main window */
+.app.mac-mode {
+  border-radius: 48px !important;
+  overflow: hidden !important;
+}
+
+/* All containers */
+.app.mac-mode #phone-shell,
+.app.mac-mode .screen-stage,
+.app.mac-mode #phone-screen,
+.app.mac-mode .screen-viewport,
+.app.mac-mode .main-body,
+.app.mac-mode .display-col,
+.app.mac-mode .workspace,
+.app.mac-mode .stage {
+  border-radius: 48px !important;
+  overflow: hidden !important;
+}
+
+/* Iframe and canvas */
+.app.mac-mode #screen-view,
+.app.mac-mode .screen-frame,
+.app.mac-mode .mirror-frame,
+.app.mac-mode iframe,
+.app.mac-mode canvas {
+  border-radius: 48px !important;
+}
+
+/* Remove any borders that might show */
+.app.mac-mode,
+.app.mac-mode * {
+  border: none !important;
+  outline: none !important;
+}
+
+/* Clip path as backup */
+.app.mac-mode {
+  clip-path: inset(0 round 48px) !important;
+}
