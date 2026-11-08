@@ -157,3 +157,13 @@ html, body {
   border-radius: 48px !important;
   overflow: hidden !important;
 }
+
+/* The preview is the screen itself, not a phone mockup or bezel. */
+html,
+body,
+#crop-wrapper,
+#c,
+canvas {
+  border-radius: 0 !important;
+  clip-path: none !important;
+}
