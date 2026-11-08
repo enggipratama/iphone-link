@@ -118,3 +118,10 @@ body.fit-contain canvas {
   opacity: 0 !important;
   visibility: hidden !important;
 }
+
+
+/* Rounded corners for mirror canvas */
+body, html, #crop-wrapper, #c, canvas {
+  border-radius: 47px !important;
+  overflow: hidden !important;
+}
