@@ -2404,6 +2404,15 @@ function wireRemoteControls() {
   });
 }
 
+// Keep the CSS device frame aligned with the aspect ratio of the live iPhone.
+function setFrameAspectRatio(aspect) {
+  const numericAspect = Number(aspect);
+  if (!Number.isFinite(numericAspect) || numericAspect < 0.35 || numericAspect > 2.5) return;
+  const value = String(numericAspect);
+  document.documentElement.style.setProperty("--device-aspect", value);
+  appRoot?.style.setProperty("--device-aspect", value);
+}
+
 // Tahap 69: Atomic Synchronization for Canvas Rotation & Window Dimensions
 function setLandscapeOrientation(targetLandscape, source = "manual") {
   isLandscapeMode = Boolean(targetLandscape);
@@ -2422,6 +2431,7 @@ function setLandscapeOrientation(targetLandscape, source = "manual") {
   const displayWidth = isLandscapeMode ? "840px" : "346px";
   document.documentElement.style.setProperty("--display-width", displayWidth);
   appRoot?.style.setProperty("--display-width", displayWidth);
+  setFrameAspectRatio(isLandscapeMode ? (840 / 386) : (lastDeviceAspect || (346 / 750)));
 
   const isDrawerOpen = !controlPane?.hidden && (controlPane?.classList.contains("open") || appRoot?.classList.contains("drawer-open"));
   if (window.pywebview?.api?.set_orientation) {
@@ -2467,10 +2477,13 @@ window.toggleLandscapeMode = toggleLandscapeMode;
 function handleDeviceDimensions(width, height) {
   if (!width || !height) return;
   lastDeviceDimensions = { width, height };
-  if (isLandscapeMode || isFullSize || (appRoot && appRoot.classList.contains("is-fullsize")) || appRoot?.classList.contains("is-landscape")) return;
   const aspect = width / height;
   if (aspect < 0.35 || aspect > 2.5) return;
-  lastDeviceAspect = aspect;
+  if (!isLandscapeMode) {
+    lastDeviceAspect = aspect;
+    setFrameAspectRatio(aspect);
+  }
+  if (isLandscapeMode || isFullSize || (appRoot && appRoot.classList.contains("is-fullsize")) || appRoot?.classList.contains("is-landscape")) return;
 
   if (currentFitMode === "autofit") {
     // 838 window height - 36px Top Bar - 44px Quick Nav = 756px calibrated stage height (Tahap 69: Zero Black Bar)
