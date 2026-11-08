@@ -2914,3 +2914,25 @@ body {
   border-radius: 50px !important;
   overflow: hidden !important;
 }
+
+
+/* Remove black corners - transparent background */
+.app.mac-mode,
+.app.mac-mode body,
+.app.mac-mode html,
+html.mac-mode,
+body.mac-mode {
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+.app.mac-mode #phone-shell,
+.app.mac-mode .screen-stage,
+.app.mac-mode #phone-screen,
+.app.mac-mode .screen-viewport,
+.app.mac-mode .main-body,
+.app.mac-mode .display-col,
+.app.mac-mode .workspace {
+  background: transparent !important;
+  background-color: transparent !important;
+}
