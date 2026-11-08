@@ -125,3 +125,16 @@ body, html, #crop-wrapper, #c, canvas {
   border-radius: 47px !important;
   overflow: hidden !important;
 }
+
+
+/* Aggressive rounded corners */
+body, html {
+  border-radius: 50px !important;
+  overflow: hidden !important;
+  clip-path: inset(0 round 50px) !important;
+}
+
+#crop-wrapper, #c, canvas {
+  border-radius: 50px !important;
+  overflow: hidden !important;
+}
