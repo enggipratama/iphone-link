@@ -1615,23 +1615,35 @@ toggleGuide?.addEventListener("click", () => {
 
 
 // Tahap 95: Real-time Wallpaper Signature Sync (< 0.8s reaction, 0.00% CPU)
+let _wallpaperObjectUrl = null;
+let _wallpaperRequestId = 0;
 function applyWallpaperSignature(sig) {
   if (!sig || sig === currentWallpaperSig) return;
-  currentWallpaperSig = sig;
+  const requestId = ++_wallpaperRequestId;
   const imgUrl = `/api/system/wallpaper?v=${encodeURIComponent(sig)}_${Date.now()}`;
-  document.documentElement.style.setProperty("--wallpaper-bg-image", `url("${imgUrl}")`);
-  const appEl = document.querySelector(".app");
-  if (appEl) {
-    appEl.style.setProperty("--wallpaper-bg-image", `url("${imgUrl}")`);
-  }
-  const img = new Image();
-  img.onload = () => {
-    document.documentElement.style.setProperty("--wallpaper-bg-image", `url("${imgUrl}")`);
-    if (appEl) {
-      appEl.style.setProperty("--wallpaper-bg-image", `url("${imgUrl}")`);
-    }
-  };
-  img.src = imgUrl;
+  fetch(imgUrl, { cache: "no-store" })
+    .then((response) => {
+      if (!response.ok) throw new Error(`Wallpaper request failed (${response.status})`);
+      return response.blob();
+    })
+    .then((blob) => {
+      const objectUrl = URL.createObjectURL(blob);
+      const img = new Image();
+      img.onload = () => {
+        if (requestId !== _wallpaperRequestId) {
+          URL.revokeObjectURL(objectUrl);
+          return;
+        }
+        currentWallpaperSig = sig;
+        document.documentElement.style.setProperty("--wallpaper-bg-image", `url("${objectUrl}")`);
+        document.querySelector(".app")?.style.setProperty("--wallpaper-bg-image", `url("${objectUrl}")`);
+        if (_wallpaperObjectUrl) URL.revokeObjectURL(_wallpaperObjectUrl);
+        _wallpaperObjectUrl = objectUrl;
+      };
+      img.onerror = () => URL.revokeObjectURL(objectUrl);
+      img.src = objectUrl;
+    })
+    .catch((error) => console.warn("Wallpaper load failed:", error));
 }
 window.applyWallpaperSignature = applyWallpaperSignature;
 

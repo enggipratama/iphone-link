@@ -7,12 +7,14 @@ from __future__ import annotations
 
 import ctypes
 from ctypes import wintypes
+import os
 import sys
 
 import json
 import threading
 import time
 from typing import Any
+import urllib.request
 
 from handset.window_effects import reapply_dwm_rounded_corners
 from handset.device_screen import get_dimensions_for_product, is_ipad
@@ -139,7 +141,10 @@ class WindowApi:
         req = urllib.request.Request(
             f"http://{self._host}:{self._port}{path}",
             data=payload,
-            headers={"Content-Type": "application/json"},
+            headers={
+                "Content-Type": "application/json",
+                "X-Pane-Token": os.environ.get("PANE_API_TOKEN", ""),
+            },
             method="POST",
         )
         with urllib.request.urlopen(req, timeout=timeout) as resp:
@@ -275,7 +280,10 @@ class WindowApi:
         try:
             # [Tahap 70] moved to module top-level
 
-            req = urllib.request.Request(f"http://{self._host}:{self._port}/api/tray-state")
+            req = urllib.request.Request(
+                f"http://{self._host}:{self._port}/api/tray-state",
+                headers={"X-Pane-Token": os.environ.get("PANE_API_TOKEN", "")},
+            )
             with urllib.request.urlopen(req, timeout=0.35) as resp:
                 data = json.loads(resp.read().decode("utf-8"))
                 stealth_on = bool(data.get("stealth"))
@@ -740,5 +748,3 @@ class WindowApi:
         except Exception:
             from handset.screen import wipe_all_privacy_data
             return wipe_all_privacy_data()
-
-

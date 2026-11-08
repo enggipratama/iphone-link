@@ -2204,7 +2204,7 @@ iframe[hidden],
    ====================================================================== */
 
 :root {
-  --wallpaper-bg-image: url("/api/system/wallpaper");
+  --wallpaper-bg-image: none;
   --screen-w: 1920px;
   --screen-h: 1080px;
   --win-x: 0px;
