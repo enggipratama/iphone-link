@@ -2744,18 +2744,22 @@ body {
 /* Hide toolbar by default, show on hover */
 .app.mac-mode .app-bar {
   opacity: 0;
-  transition: opacity 0.2s ease;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   z-index: 9999;
-  background: rgba(0, 0, 0, 0.8);
+  background: rgba(0, 0, 0, 0.85);
   backdrop-filter: blur(12px);
 }
 
-.app.mac-mode:hover .app-bar {
+/* Only show toolbar when hovering the top 40px */
+.app.mac-mode .app-bar:hover,
+.app.mac-mode:hover .app-bar:hover {
   opacity: 1;
+  pointer-events: auto;
 }
 
 /* Ensure buttons are clickable */
@@ -2850,4 +2854,41 @@ body {
   width: 100% !important;
   height: 100% !important;
   border-radius: 44px !important;
+}
+
+
+/* Force rounded corners on all elements */
+.app.mac-mode,
+.app.mac-mode * {
+  border-radius: 0;
+}
+
+.app.mac-mode {
+  border-radius: 47px !important;
+  overflow: hidden !important;
+}
+
+.app.mac-mode #phone-shell,
+.app.mac-mode .screen-stage {
+  border-radius: 47px !important;
+  overflow: hidden !important;
+}
+
+.app.mac-mode #phone-screen,
+.app.mac-mode .screen-viewport {
+  border-radius: 47px !important;
+  overflow: hidden !important;
+}
+
+.app.mac-mode #screen-view,
+.app.mac-mode iframe,
+.app.mac-mode canvas {
+  border-radius: 47px !important;
+}
+
+/* Remove any visible borders */
+.app.mac-mode,
+.app.mac-mode * {
+  border: none !important;
+  outline: none !important;
 }
