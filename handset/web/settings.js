@@ -990,3 +990,21 @@ document.addEventListener("keydown", (e) => {
     window.pywebview?.api?.minimize?.();
   }
 });
+
+
+// Sidebar button handlers
+document.querySelector("#sidebar-settings")?.addEventListener("click", () => {
+  document.querySelector("#btn-settings")?.click();
+});
+document.querySelector("#sidebar-restart")?.addEventListener("click", () => {
+  fetch("/api/screen/restart", { method: "POST" }).catch(() => {});
+});
+document.querySelector("#sidebar-audio")?.addEventListener("click", () => {
+  document.querySelector("#btn-audio-top")?.click();
+});
+document.querySelector("#sidebar-minimize")?.addEventListener("click", () => {
+  window.pywebview?.api?.minimize?.();
+});
+document.querySelector("#sidebar-close")?.addEventListener("click", () => {
+  window.pywebview?.api?.close?.();
+});
