@@ -2936,3 +2936,27 @@ body.mac-mode {
   background: transparent !important;
   background-color: transparent !important;
 }
+
+
+/* Hide toolbar completely - use keyboard shortcuts instead */
+.app.mac-mode .app-bar {
+  display: none !important;
+}
+
+/* Keyboard shortcut hints (optional, can be removed) */
+.app.mac-mode::after {
+  content: "Alt+S Settings | Alt+R Restart | Alt+Q Close";
+  position: absolute;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 10px;
+  color: rgba(255,255,255,0.3);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.app.mac-mode:hover::after {
+  opacity: 1;
+}
