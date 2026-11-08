@@ -87,7 +87,7 @@ if (screenEmpty) {
 // ======================================================================
 // Tahap 70: Global State Variables (Declared Top-Level to Eliminate TDZ)
 // ======================================================================
-const MIRROR_PAGE = "/mirror.html?v=20261101_tahap70_hotfix_anti_tdz";
+const MIRROR_PAGE = "/mirror.html?v=20261108_screen_only";
 const MIRROR_API = "/mirror";
 
 let isLandscapeMode = false;
