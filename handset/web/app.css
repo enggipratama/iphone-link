@@ -2794,3 +2794,60 @@ body {
   padding: 0;
   margin: 0;
 }
+
+
+/* ============================================
+   Remove frame and bottom nav completely
+   ============================================ */
+
+/* Hide bottom navigation */
+.app.mac-mode .quick-nav,
+.app.mac-mode nav,
+.app.mac-mode #quick-nav {
+  display: none !important;
+  height: 0 !important;
+  visibility: hidden !important;
+}
+
+/* Remove any borders/frames */
+.app.mac-mode,
+.app.mac-mode #phone-shell,
+.app.mac-mode .screen-stage,
+.app.mac-mode #phone-screen,
+.app.mac-mode .screen-viewport,
+.app.mac-mode #screen-view,
+.app.mac-mode iframe,
+.app.mac-mode .main-body,
+.app.mac-mode .display-col,
+.app.mac-mode .workspace {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Make phone fill entire window */
+.app.mac-mode #phone-shell,
+.app.mac-mode .screen-stage,
+.app.mac-mode #phone-screen,
+.app.mac-mode .screen-viewport {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
+}
+
+/* Rounded corners on the window itself */
+.app.mac-mode {
+  border-radius: 44px !important;
+  overflow: hidden !important;
+}
+
+/* Ensure iframe fills and has rounded corners */
+.app.mac-mode #screen-view,
+.app.mac-mode iframe {
+  width: 100% !important;
+  height: 100% !important;
+  border-radius: 44px !important;
+}
