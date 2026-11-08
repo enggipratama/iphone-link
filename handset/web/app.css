@@ -2738,8 +2738,8 @@ body {
 
 
 /* ======================================================================
-   iPhone Mirroring-inspired window and device frame
-   Keep the live image edge-to-edge while giving it a clean rounded frame.
+   iPhone screen-only presentation
+   Keep the live image edge-to-edge with rounded screen corners, no handset shell.
    ====================================================================== */
 .app.mac-mode {
   --mac-frame-radius: clamp(28px, 4vw, 50px);
@@ -2823,7 +2823,7 @@ body {
   background: transparent !important;
 }
 
-/* The outer ring is drawn outside the screen, so the live image keeps its exact aspect ratio. */
+/* The shell is only a clipping viewport; the live image itself is the visible screen. */
 .app.mac-mode #phone-shell {
   position: relative !important;
   display: flex !important;
@@ -2837,22 +2837,11 @@ body {
   aspect-ratio: var(--device-aspect, 0.461333) !important;
   margin: auto !important;
   padding: 0 !important;
-  overflow: visible !important;
+  overflow: hidden !important;
   border: 0 !important;
   border-radius: var(--mac-frame-radius) !important;
   background: transparent !important;
   box-shadow: none !important;
-}
-
-.app.mac-mode #phone-shell::before {
-  content: "";
-  position: absolute;
-  inset: -6px;
-  z-index: 4;
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  border-radius: calc(var(--mac-frame-radius) + 6px);
-  box-shadow: 0 0 0 5px rgba(8, 9, 12, 0.94), 0 22px 64px rgba(0, 0, 0, 0.52);
-  pointer-events: none;
 }
 
 .app.mac-mode #phone-screen,
@@ -2874,7 +2863,7 @@ body {
   border: 0 !important;
   border-radius: inherit !important;
   background: #000 !important;
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12) !important;
+  box-shadow: none !important;
 }
 
 .app.mac-mode #screen-view,
@@ -2898,7 +2887,7 @@ body {
   background: #101116 !important;
 }
 
-/* Full-size mode scales the same silhouette to the available window area. */
+/* Full-size mode scales the screen to the available window area. */
 .app.mac-mode.is-fullsize #phone-shell {
   width: min(calc((100vh - 106px) * var(--device-aspect, 0.461333)), calc(100vw - 52px)) !important;
   height: auto !important;
@@ -2908,7 +2897,7 @@ body {
   flex: 0 1 auto !important;
 }
 
-/* Landscape keeps its native wide silhouette and smaller corner curvature. */
+/* Landscape keeps its native wide screen ratio and smaller corner curvature. */
 .app.mac-mode.is-landscape {
   --mac-frame-radius: clamp(18px, 3vw, 36px);
 }
