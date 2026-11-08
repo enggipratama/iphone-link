@@ -173,6 +173,7 @@ function toggleSettings(open) {
   controlPane.classList.toggle("is-open", shouldOpen);
   controlPane.setAttribute("aria-hidden", String(!shouldOpen));
   btnSettings?.classList.toggle("active", shouldOpen);
+  btnSettings?.setAttribute("aria-expanded", String(shouldOpen));
   appRoot?.classList.toggle("drawer-open", shouldOpen);
 
   // Tahap 91: Dispatch resize to mirror iframe & window so layout updates smoothly
@@ -1505,6 +1506,8 @@ function applyFullsizeState(full, forceDrawerClose = true) {
     if (isFullSize && forceDrawerClose) {
       isDrawerOpen = false;
       appRoot.classList.remove("drawer-open");
+      btnSettings?.classList.remove("active");
+      btnSettings?.setAttribute("aria-expanded", "false");
       if (controlPane) {
         controlPane.classList.remove("is-open");
         controlPane.classList.remove("open");
@@ -1615,23 +1618,35 @@ toggleGuide?.addEventListener("click", () => {
 
 
 // Tahap 95: Real-time Wallpaper Signature Sync (< 0.8s reaction, 0.00% CPU)
+let _wallpaperObjectUrl = null;
+let _wallpaperRequestId = 0;
 function applyWallpaperSignature(sig) {
   if (!sig || sig === currentWallpaperSig) return;
-  currentWallpaperSig = sig;
+  const requestId = ++_wallpaperRequestId;
   const imgUrl = `/api/system/wallpaper?v=${encodeURIComponent(sig)}_${Date.now()}`;
-  document.documentElement.style.setProperty("--wallpaper-bg-image", `url("${imgUrl}")`);
-  const appEl = document.querySelector(".app");
-  if (appEl) {
-    appEl.style.setProperty("--wallpaper-bg-image", `url("${imgUrl}")`);
-  }
-  const img = new Image();
-  img.onload = () => {
-    document.documentElement.style.setProperty("--wallpaper-bg-image", `url("${imgUrl}")`);
-    if (appEl) {
-      appEl.style.setProperty("--wallpaper-bg-image", `url("${imgUrl}")`);
-    }
-  };
-  img.src = imgUrl;
+  fetch(imgUrl, { cache: "no-store" })
+    .then((response) => {
+      if (!response.ok) throw new Error(`Wallpaper request failed (${response.status})`);
+      return response.blob();
+    })
+    .then((blob) => {
+      const objectUrl = URL.createObjectURL(blob);
+      const img = new Image();
+      img.onload = () => {
+        if (requestId !== _wallpaperRequestId) {
+          URL.revokeObjectURL(objectUrl);
+          return;
+        }
+        currentWallpaperSig = sig;
+        document.documentElement.style.setProperty("--wallpaper-bg-image", `url("${objectUrl}")`);
+        document.querySelector(".app")?.style.setProperty("--wallpaper-bg-image", `url("${objectUrl}")`);
+        if (_wallpaperObjectUrl) URL.revokeObjectURL(_wallpaperObjectUrl);
+        _wallpaperObjectUrl = objectUrl;
+      };
+      img.onerror = () => URL.revokeObjectURL(objectUrl);
+      img.src = objectUrl;
+    })
+    .catch((error) => console.warn("Wallpaper load failed:", error));
 }
 window.applyWallpaperSignature = applyWallpaperSignature;
 
@@ -2392,6 +2407,15 @@ function wireRemoteControls() {
   });
 }
 
+// Keep the CSS device frame aligned with the aspect ratio of the live iPhone.
+function setFrameAspectRatio(aspect) {
+  const numericAspect = Number(aspect);
+  if (!Number.isFinite(numericAspect) || numericAspect < 0.35 || numericAspect > 2.5) return;
+  const value = String(numericAspect);
+  document.documentElement.style.setProperty("--device-aspect", value);
+  appRoot?.style.setProperty("--device-aspect", value);
+}
+
 // Tahap 69: Atomic Synchronization for Canvas Rotation & Window Dimensions
 function setLandscapeOrientation(targetLandscape, source = "manual") {
   isLandscapeMode = Boolean(targetLandscape);
@@ -2410,6 +2434,7 @@ function setLandscapeOrientation(targetLandscape, source = "manual") {
   const displayWidth = isLandscapeMode ? "840px" : "346px";
   document.documentElement.style.setProperty("--display-width", displayWidth);
   appRoot?.style.setProperty("--display-width", displayWidth);
+  setFrameAspectRatio(isLandscapeMode ? (840 / 386) : (lastDeviceAspect || (346 / 750)));
 
   const isDrawerOpen = !controlPane?.hidden && (controlPane?.classList.contains("open") || appRoot?.classList.contains("drawer-open"));
   if (window.pywebview?.api?.set_orientation) {
@@ -2455,10 +2480,13 @@ window.toggleLandscapeMode = toggleLandscapeMode;
 function handleDeviceDimensions(width, height) {
   if (!width || !height) return;
   lastDeviceDimensions = { width, height };
-  if (isLandscapeMode || isFullSize || (appRoot && appRoot.classList.contains("is-fullsize")) || appRoot?.classList.contains("is-landscape")) return;
   const aspect = width / height;
   if (aspect < 0.35 || aspect > 2.5) return;
-  lastDeviceAspect = aspect;
+  if (!isLandscapeMode) {
+    lastDeviceAspect = aspect;
+    setFrameAspectRatio(aspect);
+  }
+  if (isLandscapeMode || isFullSize || (appRoot && appRoot.classList.contains("is-fullsize")) || appRoot?.classList.contains("is-landscape")) return;
 
   if (currentFitMode === "autofit") {
     // 838 window height - 36px Top Bar - 44px Quick Nav = 756px calibrated stage height (Tahap 69: Zero Black Bar)

@@ -20,6 +20,8 @@ import hashlib
 import json
 import multiprocessing
 import os
+import re
+import secrets
 import socket
 import subprocess
 import sys
@@ -28,6 +30,64 @@ import time
 import urllib.request
 from pathlib import Path
 
+_API_TOKEN_PATTERN = re.compile(r"[A-Za-z0-9_-]{32,256}")
+
+
+def _get_shared_api_token() -> str:
+    """Load or create a private per-user token shared by GUI launcher processes."""
+    data_root = Path(os.environ.get("LOCALAPPDATA") or (Path.home() / ".local" / "share"))
+    token_path = data_root / "iPhoneLink" / "api-token"
+    try:
+        token_path.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
+        if os.name != "nt":
+            os.chmod(token_path.parent, 0o700)
+        flags = os.O_RDWR | os.O_CREAT | getattr(os, "O_NOFOLLOW", 0)
+        token_fd = os.open(token_path, flags, 0o600)
+        with os.fdopen(token_fd, "r+", encoding="ascii") as token_file:
+            if os.name != "nt":
+                os.fchmod(token_file.fileno(), 0o600)
+            if os.name == "nt":
+                import msvcrt
+
+                token_file.seek(0, os.SEEK_END)
+                if token_file.tell() == 0:
+                    token_file.write(" ")
+                    token_file.flush()
+                token_file.seek(0)
+                msvcrt.locking(token_file.fileno(), msvcrt.LK_LOCK, 1)
+            else:
+                import fcntl
+
+                fcntl.flock(token_file.fileno(), fcntl.LOCK_EX)
+            try:
+                token_file.seek(0)
+                token = token_file.read().strip()
+                if not _API_TOKEN_PATTERN.fullmatch(token):
+                    token = secrets.token_urlsafe(32)
+                    token_file.seek(0)
+                    token_file.truncate()
+                    token_file.write(token)
+                    token_file.flush()
+                    os.fsync(token_file.fileno())
+                try:
+                    os.chmod(token_path, 0o600)
+                except OSError:
+                    pass
+                return token
+            finally:
+                token_file.seek(0)
+                if os.name == "nt":
+                    msvcrt.locking(token_file.fileno(), msvcrt.LK_UNLCK, 1)
+                else:
+                    fcntl.flock(token_file.fileno(), fcntl.LOCK_UN)
+    except (ImportError, OSError):
+        existing = os.environ.get("PANE_API_TOKEN", "")
+        if _API_TOKEN_PATTERN.fullmatch(existing):
+            return existing
+        return secrets.token_urlsafe(32)
+
+
+os.environ["PANE_API_TOKEN"] = _get_shared_api_token()
 
 # 1. Ensure safe stdout/stderr handles when running windowless (pythonw.exe or frozen .exe)
 if sys.stdout is None:
@@ -295,7 +355,10 @@ def _cleanup_stale_zombie_processes(host: str = "127.0.0.1", port: int = 8765) -
         req = urllib.request.Request(
             f"http://{host}:{port}/api/server/shutdown",
             data=b"{}",
-            headers={"Content-Type": "application/json"},
+            headers={
+                "Content-Type": "application/json",
+                "X-Pane-Token": os.environ.get("PANE_API_TOKEN", ""),
+            },
             method="POST",
         )
         with urllib.request.urlopen(req, timeout=0.6):
@@ -462,7 +525,10 @@ class WindowApi:
         req = urllib.request.Request(
             f"http://{self._host}:{self._port}{path}",
             data=payload,
-            headers={"Content-Type": "application/json"},
+            headers={
+                "Content-Type": "application/json",
+                "X-Pane-Token": os.environ.get("PANE_API_TOKEN", ""),
+            },
             method="POST",
         )
         with urllib.request.urlopen(req, timeout=timeout) as resp:
@@ -598,7 +664,10 @@ class WindowApi:
         try:
             # [Tahap 70] moved to module top-level
 
-            req = urllib.request.Request(f"http://{self._host}:{self._port}/api/tray-state")
+            req = urllib.request.Request(
+                f"http://{self._host}:{self._port}/api/tray-state",
+                headers={"X-Pane-Token": os.environ.get("PANE_API_TOKEN", "")},
+            )
             with urllib.request.urlopen(req, timeout=0.35) as resp:
                 data = json.loads(resp.read().decode("utf-8"))
                 stealth_on = bool(data.get("stealth"))
@@ -1259,7 +1328,13 @@ def apply_dwm_effects(title: str = "iPhone Link", api: WindowApi | None = None) 
 
 def _is_server_responding(url: str, timeout: float = 2.0) -> bool:
     try:
-        req = urllib.request.Request(url, headers={"User-Agent": "iPhoneLink-Launcher"})
+        req = urllib.request.Request(
+            url,
+            headers={
+                "User-Agent": "iPhoneLink-Launcher",
+                "X-Pane-Token": os.environ.get("PANE_API_TOKEN", ""),
+            },
+        )
         with urllib.request.urlopen(req, timeout=timeout) as resp:
             return resp.status == 200
     except Exception:
@@ -1346,7 +1421,10 @@ def shutdown_backend_server() -> None:
             req = urllib.request.Request(
                 f"http://{host}:{port}/api/server/shutdown",
                 data=b"{}",
-                headers={"Content-Type": "application/json"},
+                headers={
+                    "Content-Type": "application/json",
+                    "X-Pane-Token": os.environ.get("PANE_API_TOKEN", ""),
+                },
                 method="POST",
             )
             with urllib.request.urlopen(req, timeout=1.2):
@@ -1425,13 +1503,18 @@ def _run_smoke_test() -> int:
             return 7
         child_pid = _SERVER_PROC.pid
 
-        req_tray = urllib.request.Request(f"http://127.0.0.1:{free_port}/api/tray-state")
+        api_headers = {"X-Pane-Token": os.environ.get("PANE_API_TOKEN", "")}
+        req_tray = urllib.request.Request(
+            f"http://127.0.0.1:{free_port}/api/tray-state", headers=api_headers
+        )
         with urllib.request.urlopen(req_tray, timeout=2.0) as resp_tray:
             tray_data = json.loads(resp_tray.read().decode("utf-8"))
             if not tray_data.get("ok"):
                 return 8
 
-        req = urllib.request.Request(f"http://127.0.0.1:{free_port}/api/status")
+        req = urllib.request.Request(
+            f"http://127.0.0.1:{free_port}/api/status", headers=api_headers
+        )
         with urllib.request.urlopen(req, timeout=8.0) as resp:
             data = json.loads(resp.read().decode("utf-8"))
             if "screen" not in data:

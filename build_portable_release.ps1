@@ -1,12 +1,12 @@
 # ======================================================================
 # iPhone Link - Portable & Standalone EXE Release Packaging Script
 # Creates two clean release distributions ready for GitHub Releases:
-#   1) release/iPhone-Link-Portable-v1.0.0.zip (Smart Auto-Bootstrap .bat)
-#   2) release/iPhone-Link-Win64-Standalone-EXE-v1.0.0.zip (Standalone .exe)
+#   1) release/iPhone-Link-Portable-v2.0.0.zip (Smart Auto-Bootstrap .bat)
+#   2) release/iPhone-Link-Win64-Standalone-EXE-v2.0.0.zip (Standalone .exe)
 # ======================================================================
 
 param (
-    [string]$Version = "v1.0.0",
+    [string]$Version = "v2.0.0",
     [switch]$SkipExe = $false
 )
 

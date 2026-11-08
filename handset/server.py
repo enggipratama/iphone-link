@@ -3,10 +3,13 @@
 from __future__ import annotations
 
 import hashlib
+import hmac
 import http.client
+import ipaddress
 import os
 import json
 import re
+import secrets
 import socket
 import sys
 import subprocess
@@ -14,7 +17,7 @@ import time
 import urllib.request
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
-from urllib.parse import parse_qs, unquote, urlparse
+from urllib.parse import parse_qs, unquote, urlparse, urlsplit
 
 _WIN_NO_WINDOW_KWARGS: dict = {}
 if sys.platform == "win32":
@@ -132,6 +135,9 @@ _HOP_BY_HOP = frozenset(
     {"connection", "keep-alive", "proxy-authenticate", "proxy-authorization", "te", "trailers", "upgrade"}
 )
 _CLIENT_GONE = (BrokenPipeError, ConnectionAbortedError, ConnectionResetError)
+API_TOKEN_HEADER = "X-Pane-Token"
+MAX_REQUEST_BODY_BYTES = 32 * 1024 * 1024
+_AUTHENTICATED_PATHS = ("/api", "/mirror", "/debug-metrics")
 
 DEFAULT_SETTINGS = {
     "crop": {"top": 0, "bottom": 0, "left": 0, "right": 0},
@@ -563,9 +569,117 @@ class Handler(BaseHTTPRequestHandler):
         self.send_header("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0")
         self.send_header("Pragma", "no-cache")
         self.send_header("Expires", "0")
+        self.send_header("X-Content-Type-Options", "nosniff")
+        self.send_header("X-Frame-Options", "SAMEORIGIN")
+        self.send_header("Referrer-Policy", "no-referrer")
+        self.send_header("Cross-Origin-Resource-Policy", "same-origin")
+        self.send_header("Content-Security-Policy", "frame-ancestors 'self'; base-uri 'self'; object-src 'none'")
         super().end_headers()
 
+    def _is_authenticated_path(self, path: str) -> bool:
+        return any(path == prefix or path.startswith(f"{prefix}/") for prefix in _AUTHENTICATED_PATHS)
+
+    def _host_is_allowed(self) -> bool:
+        host_header = self.headers.get("Host", "")
+        try:
+            parsed = urlsplit(f"//{host_header}")
+            hostname = (parsed.hostname or "").lower().rstrip(".")
+            port = parsed.port
+        except ValueError:
+            return False
+        if not hostname or parsed.username or parsed.password or parsed.path or parsed.query or parsed.fragment:
+            return False
+        if port is None:
+            port = 80
+        if port != self.server.server_port:
+            return False
+
+        allowed_hosts = {"127.0.0.1", "localhost", "::1"}
+        for candidate in (
+            getattr(self.server, "configured_host", ""),
+            str(self.server.server_address[0]),
+        ):
+            candidate = str(candidate).strip().lower().rstrip(".")
+            if candidate and candidate not in {"0.0.0.0", "::", ""}:
+                allowed_hosts.add(candidate.strip("[]"))
+        return hostname in allowed_hosts
+
+    def _client_is_loopback(self) -> bool:
+        try:
+            address = ipaddress.ip_address(self.client_address[0])
+            if isinstance(address, ipaddress.IPv6Address) and address.ipv4_mapped:
+                address = address.ipv4_mapped
+            return address.is_loopback
+        except (IndexError, ValueError):
+            return False
+
+    def _reject_request(self, status: int, message: str) -> bool:
+        self._json({"error": message}, status=status)
+        return False
+
+    def _validate_request(self) -> bool:
+        """Reject hostile origins, missing API credentials, and unsafe bodies before routing."""
+        if not self._host_is_allowed():
+            return self._reject_request(403, "Host not allowed.")
+
+        path = urlparse(self.path).path
+        is_html_page = path in {"", "/"} or path.lower().endswith(".html")
+        if (self._is_authenticated_path(path) or is_html_page) and not self._client_is_loopback():
+            return self._reject_request(403, "This local service is not available to remote clients.")
+        if self._is_authenticated_path(path):
+            request_host = self.headers.get("Host", "").lower()
+            origin = self.headers.get("Origin")
+            if origin:
+                try:
+                    parsed_origin = urlsplit(origin)
+                    if (
+                        parsed_origin.scheme != "http"
+                        or parsed_origin.netloc.lower() != request_host
+                        or parsed_origin.path not in ("", "/")
+                        or parsed_origin.query
+                        or parsed_origin.fragment
+                    ):
+                        return self._reject_request(403, "Origin not allowed.")
+                except ValueError:
+                    return self._reject_request(403, "Origin not allowed.")
+            fetch_site = self.headers.get("Sec-Fetch-Site", "").lower()
+            if fetch_site and fetch_site != "same-origin":
+                return self._reject_request(403, "Cross-origin request blocked.")
+            supplied_token = self.headers.get(API_TOKEN_HEADER, "")
+            expected_token = getattr(self.server, "api_token", "")
+            try:
+                valid_token = bool(expected_token) and hmac.compare_digest(supplied_token, expected_token)
+            except TypeError:
+                valid_token = False
+            if not valid_token:
+                return self._reject_request(401, "Authentication required.")
+
+        if self.headers.get("Transfer-Encoding"):
+            return self._reject_request(400, "Transfer-Encoding is not supported.")
+        content_lengths = self.headers.get_all("Content-Length", [])
+        if len(content_lengths) > 1:
+            return self._reject_request(400, "Invalid Content-Length.")
+        try:
+            content_length = int(content_lengths[0]) if content_lengths else 0
+        except (TypeError, ValueError):
+            return self._reject_request(400, "Invalid Content-Length.")
+        if content_length < 0:
+            return self._reject_request(400, "Invalid Content-Length.")
+        if content_length > MAX_REQUEST_BODY_BYTES:
+            return self._reject_request(413, "Request body is too large.")
+        if self.command == "GET" and content_length:
+            return self._reject_request(400, "GET requests must not include a body.")
+        if content_length and self._is_authenticated_path(path):
+            content_type = self.headers.get("Content-Type", "").split(";", 1)[0].strip().lower()
+            if content_type != "application/json" and not (
+                content_type.startswith("application/") and content_type.endswith("+json")
+            ):
+                return self._reject_request(415, "API request bodies must be JSON.")
+        return True
+
     def do_GET(self) -> None:
+        if not self._validate_request():
+            return
         path = urlparse(self.path).path
         if path == MIRROR_PREFIX or path.startswith(f"{MIRROR_PREFIX}/"):
             self._proxy_mirror("GET")
@@ -654,6 +768,8 @@ class Handler(BaseHTTPRequestHandler):
         self._file(path)
 
     def do_POST(self) -> None:
+        if not self._validate_request():
+            return
         global _ACTIVE_CLIPBOARD_SOURCE, _LAST_WIN_CLIPBOARD_SEQ
         path = urlparse(self.path).path
         if path == "/debug-metrics":
@@ -1363,6 +1479,13 @@ class Handler(BaseHTTPRequestHandler):
             ".ico": "image/x-icon",
         }.get(target.suffix, "application/octet-stream")
         body = target.read_bytes()
+        if target.suffix.lower() == ".html":
+            token = getattr(self.server, "api_token", "")
+            bootstrap = (
+                f'<meta name="pane-api-token" content="{token}">\n'
+                '<script src="/security.js"></script>\n'
+            ).encode("utf-8")
+            body = body.replace(b"</head>", bootstrap + b"</head>", 1)
         self.send_response(200)
         self.send_header("Content-Type", kind)
         self.send_header("Content-Length", str(len(body)))
@@ -1376,6 +1499,14 @@ class Handler(BaseHTTPRequestHandler):
 class SingleServer(ThreadingHTTPServer):
     # On Windows, address reuse lets a second copy bind the same port and steal requests.
     allow_reuse_address = False
+
+    def __init__(self, server_address, RequestHandlerClass, bind_and_activate=True):
+        super().__init__(server_address, RequestHandlerClass, bind_and_activate=bind_and_activate)
+        self.configured_host = os.environ.get("PANE_HOST") or str(server_address[0])
+        configured_token = os.environ.get("PANE_API_TOKEN", "")
+        if not re.fullmatch(r"[A-Za-z0-9_-]{32,256}", configured_token):
+            configured_token = secrets.token_urlsafe(32)
+        self.api_token = configured_token
 
     def get_request(self):
         sock, addr = super().get_request()
@@ -1441,4 +1572,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
