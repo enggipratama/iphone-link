@@ -145,3 +145,15 @@ body, html, #crop-wrapper {
   background: transparent !important;
   background-color: transparent !important;
 }
+
+
+/* Rounded corners for mirror */
+html, body {
+  border-radius: 48px !important;
+  overflow: hidden !important;
+}
+
+#crop-wrapper, #c, canvas {
+  border-radius: 48px !important;
+  overflow: hidden !important;
+}
